@@ -13,10 +13,46 @@
 
 package org.camunda.bpm.getstarted.loanapproval;
 
+import com.github.javafaker.Faker;
+import org.camunda.bpm.application.PostDeploy;
 import org.camunda.bpm.application.ProcessApplication;
 import org.camunda.bpm.application.impl.ServletProcessApplication;
+import org.camunda.bpm.engine.ProcessEngine;
+import org.camunda.bpm.engine.runtime.ProcessInstance;
+
+import javax.annotation.PostConstruct;
+import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Random;
 
 @ProcessApplication("Loan Approval App")
 public class LoanApprovalApplication extends ServletProcessApplication {
-  // empty implementation
+
+    @PostDeploy
+    public void onDeploymentFinished(ProcessEngine processEngine) {
+
+        HashMap<String, Object> variables;
+        Faker faker;
+
+        for (int i = 0; i < 50; i++) {
+            faker = new Faker();
+
+            variables = new HashMap<String, Object>();
+
+            variables.put("customerId", faker.idNumber().valid());
+            variables.put("name", faker.name().lastName());
+
+            double amount = (double) new Random().nextInt(10000);
+
+            variables.put("amount", amount);
+
+            ProcessInstance instance = processEngine.getRuntimeService()
+                    .startProcessInstanceByKey("approve-loan", variables);
+
+            String taskId = processEngine.getTaskService().createTaskQuery()
+                    .processInstanceId(instance.getId()).singleResult().getId();
+
+            processEngine.getTaskService().complete(taskId);
+        }
+    }
 }

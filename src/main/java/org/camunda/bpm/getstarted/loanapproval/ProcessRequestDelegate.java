@@ -16,6 +16,7 @@ package org.camunda.bpm.getstarted.loanapproval;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 
+import java.util.Random;
 import java.util.logging.Logger;
 
 public class ProcessRequestDelegate implements JavaDelegate {
@@ -23,7 +24,21 @@ public class ProcessRequestDelegate implements JavaDelegate {
   private final static Logger LOGGER = Logger.getLogger("LOAN-REQUESTS");
 
   public void execute(DelegateExecution execution) throws Exception {
-    LOGGER.info("Processing request by '"+execution.getVariable("customerId")+"'...");
+
+    String customerId = (String) execution.getVariable("customerId");
+    String name = (String) execution.getVariable("name");
+
+    LOGGER.info("Processing request by " + customerId + " : " + name);
+
+    double amount = (Double) execution.getVariable("amount");
+
+    if (amount > 5000) {
+
+      Random r = new Random();
+
+      Thread.sleep(r.nextInt(2000) + 3000);
+    }
+    LOGGER.info("Request processed of " + customerId + " : " + name);
   }
 
 }
